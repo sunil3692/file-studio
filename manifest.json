@@ -1,0 +1,17 @@
+{
+  "name": "File Studio",
+  "short_name": "File Studio",
+  "description": "PDF aur photo compress, convert, merge aur edit karo. Bina internet ke chalta hai.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef0f5",
+  "theme_color": "#3446d8",
+  "lang": "hi",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
