@@ -1,0 +1,60 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - android.zip
+      - apk-index.html
+      - .github/workflows/build-apk.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Prepare project
+        run: |
+          unzip -q android.zip -d build-src
+          mkdir -p build-src/app/src/main/assets
+          cp apk-index.html build-src/app/src/main/assets/index.html
+
+      # Ek hi signing key hamesha use hoti hai, taaki naya APK purane ke upar install ho sake
+      - name: Signing key
+        run: |
+          if [ ! -f signing.jks ]; then
+            keytool -genkeypair -keystore signing.jks -storepass filestudio -keypass filestudio -alias filestudio -keyalg RSA -keysize 2048 -validity 20000 -dname "CN=File Studio"
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git add signing.jks
+            git commit -m "Add app signing key"
+            git push
+          fi
+          cp signing.jks build-src/signing.jks
+
+      - name: Build
+        run: |
+          cd build-src
+          gradle --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk ../FileStudio.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: File Studio 1.${{ github.run_number }}
+          files: FileStudio.apk
+          make_latest: true
